@@ -18,13 +18,13 @@ public class UserController {
     UserService userService;
 
     @PostMapping("/register")
-    public Response<User> register(@RequestBody SigninDto signinDto){
+    public Response<User> register(@RequestBody SignupDto signupDto){
         User user = User.builder()
-                .name(signinDto.getName())
-                .email(signinDto.getEmail())
-                .password(signinDto.getPassword())
+                .name(signupDto.getName())
+                .email(signupDto.getEmail())
+                .password(signupDto.getPassword())
                 .cash(0.0)
-                .birthdate(signinDto.getBirthdate())
+                .birthdate(signupDto.getBirthdate())
                 .created_at(LocalDate.now())
                 .is_active(true)
                 .role(Role.USER)
