@@ -11,6 +11,6 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 @AllArgsConstructor
 @Component
-public class ReceiverDto {
-    private String accountNumber;
+public class UserDto {
+    private Integer id;
 }

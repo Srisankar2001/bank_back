@@ -15,4 +15,5 @@ public class Response<T> {
     private Boolean status;
     private T data;
     private String error;
+    private String token;
 }

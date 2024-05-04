@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 @Component
 public class TransferDto {
-    private Integer userId;
-    private Integer receiverId;
+    private Integer id;
+    private String accountNumber;
     private Double cash;
 }

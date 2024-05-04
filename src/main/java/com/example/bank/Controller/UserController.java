@@ -1,66 +1,52 @@
 package com.example.bank.Controller;
 
 import com.example.bank.Config.Response;
-import com.example.bank.Dto.*;
-import com.example.bank.Entity.Role;
-import com.example.bank.Entity.User;
+import com.example.bank.Dto.DepositDto;
+import com.example.bank.Dto.TransferDto;
+import com.example.bank.Dto.UserDto;
+import com.example.bank.Dto.WithdrawDto;
 import com.example.bank.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-
 @RestController
-@RequestMapping("/api")
-@CrossOrigin
+@CrossOrigin("*")
+@RequestMapping("/api/user")
 public class UserController {
     @Autowired
     UserService userService;
 
-    @PostMapping("/register")
-    public Response<User> register(@RequestBody SignupDto signupDto){
-        User user = User.builder()
-                .name(signupDto.getName())
-                .email(signupDto.getEmail())
-                .password(signupDto.getPassword())
-                .cash(0.0)
-                .birthdate(signupDto.getBirthdate())
-                .created_at(LocalDate.now())
-                .is_active(true)
-                .role(Role.USER)
-                .accountNumber(userService.generateAccountNumber())
-                .build();
-
-        return userService.register(user);
+    @PostMapping("/detail")
+    public Response<?> getDetails(@RequestBody UserDto userDto){
+        return userService.getDetails(userDto.getId());
     }
 
-    @PostMapping("/login")
-    public Response<User> login(@RequestBody LoginDto loginDto){
-        User user = User.builder()
-                .email(loginDto.getEmail())
-                .password(loginDto.getPassword())
-                .build();
-
-        return userService.login(user);
+    @GetMapping("/getDeposits")
+    public Response<?> getDeposits(@RequestBody UserDto userDto){
+        return userService.getDeposits(userDto.getId());
     }
 
-    @PostMapping("/receiver")
-    public Response<User> receiver(@RequestBody ReceiverDto receiverDto){
-        return userService.receiver(receiverDto.getAccountNumber());
+    @GetMapping("/getWithdraws")
+    public Response<?> getWithdraws(@RequestBody UserDto userDto){
+        return userService.getWithdraws(userDto.getId());
+    }
+
+    @GetMapping("/getTransfers")
+    public Response<?> getTransfers(@RequestBody UserDto userDto){
+        return userService.getTransfers(userDto.getId());
     }
     @PostMapping("/deposit")
-    public Response<User> deposit(@RequestBody DepositDto depositDto){
-        return userService.deposit(depositDto.getId(), depositDto.getCash());
+    public Response<?> deposit(@RequestBody DepositDto depositDto){
+        return userService.deposit(depositDto.getId(),depositDto.getCash());
     }
 
     @PostMapping("/withdraw")
-    public Response<User> withdraw(@RequestBody WithdrawDto withdrawDto){
-        return userService.withdraw(withdrawDto.getId(), withdrawDto.getCash());
+    public Response<?> withdraw(@RequestBody WithdrawDto withdrawDto){
+        return userService.withdraw(withdrawDto.getId(),withdrawDto.getCash());
     }
 
     @PostMapping("/transfer")
-    public Response<User> transfer(@RequestBody TransferDto transferDto){
-        return userService.transfer(transferDto.getUserId(), transferDto.getReceiverId(),transferDto.getCash());
+    public Response<?> transfer(@RequestBody TransferDto transferDto){
+        return userService.transfer(transferDto.getId(),transferDto.getAccountNumber(),transferDto.getCash());
     }
-
 }

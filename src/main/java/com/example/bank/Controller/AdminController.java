@@ -3,50 +3,56 @@ package com.example.bank.Controller;
 import com.example.bank.Config.Response;
 import com.example.bank.Dto.AdminDto;
 import com.example.bank.Dto.AdminSignupDto;
-import com.example.bank.Entity.Role;
-import com.example.bank.Entity.User;
 import com.example.bank.Service.AdminService;
+import com.example.bank.Service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.List;
-
+@CrossOrigin("*")
 @RestController
-@RequestMapping("/api")
-@CrossOrigin
+@RequestMapping("/api/admin")
 public class AdminController {
     @Autowired
     AdminService adminService;
-
-    @PostMapping("/register")
-    public Response<User> register(@RequestBody AdminSignupDto adminSignupDto){
-        User admin = User.builder()
-                .name(adminSignupDto.getName())
-                .email(adminSignupDto.getEmail())
-                .password(adminSignupDto.getPassword())
-                .birthdate(adminSignupDto.getBirthdate())
-                .cash(null)
-                .role(Role.ADMIN)
-                .accountNumber(null)
-                .is_active(true)
-                .created_at(LocalDate.now())
-                .build();
-        return adminService.register(admin);
-    }
-
-    @PostMapping("/getAllUsers")
-    public Response<List<User>> getAllUsers(@RequestBody AdminDto adminDto){
-        return adminService.getAllUsers(adminDto.getAdminId());
-    }
+    @Autowired
+    AuthService authService;
 
     @PostMapping("/block")
-    public Response<User> blockUser(@RequestBody AdminDto adminDto){
-        return adminService.blockUser(adminDto.getAdminId(),adminDto.getUserId());
+    public Response<?> blockUser(@RequestBody AdminDto adminDto){
+        return adminService.blockUser(adminDto.getUserId());
     }
 
     @PostMapping("/unblock")
-    public Response<User> unblockUser(@RequestBody AdminDto adminDto){
-        return adminService.unblockUser(adminDto.getAdminId(),adminDto.getUserId());
+    public Response<?> unblockUser(@RequestBody AdminDto adminDto){
+        return adminService.unblockUser(adminDto.getUserId());
+    }
+
+    @PostMapping("/register")
+    public Response<?> adminRegister(@RequestBody AdminSignupDto adminSignupDto){
+        if(!authService.isEmailUnique(adminSignupDto.getEmail())){
+            return Response.builder()
+                    .status(false)
+                    .error("Email already exist")
+                    .build();
+        }
+        else{
+            return authService.adminRegister(adminSignupDto);
+        }
+    }
+
+    @GetMapping("/getUsers")
+    public Response<?> getAllUsers(){
+        return adminService.getAllUsers();
+    }
+    public Response<?> getAllBlockedUsers(){
+        return adminService.getAllBlockedUsers();
+    }
+    public Response<?> getAllUnblockedUsers(){
+        return adminService.getAllUnblockedUsers();
+    }
+
+    @GetMapping("/getAdmins")
+    public Response<?> getAllAdmins(){
+        return adminService.getAllAdmins();
     }
 }
