@@ -21,20 +21,27 @@ public class UserController {
         return userService.getDetails(userDto.getId());
     }
 
-    @GetMapping("/getDeposits")
+    @PostMapping("/getDeposits")
     public Response<?> getDeposits(@RequestBody UserDto userDto){
         return userService.getDeposits(userDto.getId());
     }
 
-    @GetMapping("/getWithdraws")
+    @PostMapping("/getWithdraws")
     public Response<?> getWithdraws(@RequestBody UserDto userDto){
         return userService.getWithdraws(userDto.getId());
     }
 
-    @GetMapping("/getTransfers")
+
+    @PostMapping("/getTransfers")
     public Response<?> getTransfers(@RequestBody UserDto userDto){
         return userService.getTransfers(userDto.getId());
     }
+
+    @PostMapping("/getAllTransactions")
+    public Response<?> getTransactions(@RequestBody UserDto userDto){
+        return userService.getTransactions(userDto.getId());
+    }
+
     @PostMapping("/deposit")
     public Response<?> deposit(@RequestBody DepositDto depositDto){
         return userService.deposit(depositDto.getId(),depositDto.getCash());

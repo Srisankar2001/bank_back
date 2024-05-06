@@ -29,7 +29,7 @@ public class AuthController{
             return authService.signup(signupDto);
         }
     }
-    @PostMapping("/admin/signup")
+   @PostMapping("/admin/signup")
     public Response<?> adminRegister(@RequestBody AdminSignupDto adminSignupDto){
         if(!authService.isEmailUnique(adminSignupDto.getEmail())){
             return Response.builder()

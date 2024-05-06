@@ -1,6 +1,7 @@
 package com.example.bank.Service;
 
 import com.example.bank.Config.Response;
+import com.example.bank.Entity.Role;
 import com.example.bank.Entity.Transaction;
 import com.example.bank.Entity.Type;
 import com.example.bank.Entity.User;
@@ -46,6 +47,8 @@ public class UserService {
                 Transaction transaction = Transaction.builder()
                         .userId(id)
                         .receiverId(null)
+                        .userAccountNumber(user.getAccountNumber())
+                        .receiverAccountNumber(null)
                         .amount(cash)
                         .total(user.getCash())
                         .localTime(LocalTime.now())
@@ -77,25 +80,48 @@ public class UserService {
                 if(isReceiverExist(accountNumber)){
                     Optional<User> existingReceiver = userRepository.findByAccountNumber(accountNumber);
                     if (existingReceiver.get().getIs_active()){
-                        User user = existingUser.get();
-                        user.setCash(user.getCash() - cash);
-                        userRepository.save(user);
-                        User receiver = existingReceiver.get();
-                        receiver.setCash(receiver.getCash() + cash);
-                        userRepository.save(receiver);
-                        Transaction transaction = Transaction.builder()
-                                .userId(id)
-                                .receiverId(receiver.getId())
-                                .amount(cash)
-                                .total(user.getCash())
-                                .localTime(LocalTime.now())
-                                .localDate(LocalDate.now())
-                                .type(Type.TRANSFER)
-                                .build();
-                        transactionRepository.save(transaction);
-                        return Response.builder()
-                                .status(true)
-                                .build();
+                        if(existingReceiver.get().getRole() == Role.USER){
+                            if(existingUser.get().getId() == existingReceiver.get().getId()){
+                                return Response.builder()
+                                        .status(false)
+                                        .error("This is your account number")
+                                        .build();
+                            }else{
+                                if(existingUser.get().getCash() < cash){
+                                    return Response.builder()
+                                            .status(false)
+                                            .error("Not sufficient balance")
+                                            .build();
+                                }else{
+                                    User user = existingUser.get();
+                                    user.setCash(user.getCash() - cash);
+                                    userRepository.save(user);
+                                    User receiver = existingReceiver.get();
+                                    receiver.setCash(receiver.getCash() + cash);
+                                    userRepository.save(receiver);
+                                    Transaction transaction = Transaction.builder()
+                                            .userId(id)
+                                            .receiverId(receiver.getId())
+                                            .userAccountNumber(user.getAccountNumber())
+                                            .receiverAccountNumber(receiver.getAccountNumber())
+                                            .amount(cash)
+                                            .total(user.getCash())
+                                            .localTime(LocalTime.now())
+                                            .localDate(LocalDate.now())
+                                            .type(Type.TRANSFER)
+                                            .build();
+                                    transactionRepository.save(transaction);
+                                    return Response.builder()
+                                            .status(true)
+                                            .build();
+                                }
+                            }
+                        }else{
+                            return Response.builder()
+                                    .status(false)
+                                    .error("Invalid Account Number")
+                                    .build();
+                        }
                     }else{
                         return Response.builder()
                                 .status(false)
@@ -128,21 +154,30 @@ public class UserService {
         if(existingUser.isPresent()){
             if(existingUser.get().getIs_active()){
                 User user = existingUser.get();
-                user.setCash(user.getCash() - cash);
-                userRepository.save(user);
-                Transaction transaction = Transaction.builder()
-                        .userId(id)
-                        .receiverId(null)
-                        .amount(cash)
-                        .total(user.getCash())
-                        .localTime(LocalTime.now())
-                        .localDate(LocalDate.now())
-                        .type(Type.WITHDRAW)
-                        .build();
-                transactionRepository.save(transaction);
-                return Response.builder()
-                        .status(true)
-                        .build();
+                if(user.getCash() < cash ){
+                    return Response.builder()
+                            .status(false)
+                            .error("Not sufficient balance")
+                            .build();
+                }else{
+                    user.setCash(user.getCash() - cash);
+                    userRepository.save(user);
+                    Transaction transaction = Transaction.builder()
+                            .userId(id)
+                            .receiverId(null)
+                            .userAccountNumber(user.getAccountNumber())
+                            .receiverAccountNumber(null)
+                            .amount(cash)
+                            .total(user.getCash())
+                            .localTime(LocalTime.now())
+                            .localDate(LocalDate.now())
+                            .type(Type.WITHDRAW)
+                            .build();
+                    transactionRepository.save(transaction);
+                    return Response.builder()
+                            .status(true)
+                            .build();
+                }
             }else{
                 return Response.builder()
                         .status(false)
@@ -234,7 +269,30 @@ public class UserService {
         Optional<User> existingUser = userRepository.findById(id);
         if(existingUser.isPresent()){
             if(existingUser.get().getIs_active()){
-                List<Transaction> transactions = transactionRepository.findByUserIdOrReceiverIdAndType(id,id,Type.TRANSFER);
+                List<Transaction> transactions = transactionRepository.findByUserIdAndTypeOrReceiverIdAndType(id,Type.TRANSFER,id,Type.TRANSFER);
+                return Response.builder()
+                        .status(true)
+                        .data(transactions)
+                        .build();
+            }else{
+                return Response.builder()
+                        .status(false)
+                        .error("User is Blocked")
+                        .build();
+            }
+        }else{
+            return Response.builder()
+                    .status(false)
+                    .error("User not Found")
+                    .build();
+        }
+    }
+
+    public Response<?> getTransactions(Integer id) {
+        Optional<User> existingUser = userRepository.findById(id);
+        if(existingUser.isPresent()){
+            if(existingUser.get().getIs_active()){
+                List<Transaction> transactions = transactionRepository.findByUserIdOrReceiverId(id,id);
                 return Response.builder()
                         .status(true)
                         .data(transactions)

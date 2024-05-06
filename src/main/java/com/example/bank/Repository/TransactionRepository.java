@@ -13,7 +13,12 @@ public interface TransactionRepository extends JpaRepository<Transaction,Integer
 
     public List<Transaction> findByUserId(Integer id);
     public List<Transaction> findByUserIdAndType(Integer id, Type type);
-    public List<Transaction> findByUserIdOrReceiverIdAndType(Integer userId,Integer receiverId, Type type);
-    public List<Transaction> findByReceiverId(Integer id);
+
+    public  List<Transaction> findByUserIdAndTypeOrReceiverIdAndType(Integer userId, Type userType, Integer receiverId, Type receiverType);
+
+    public List<Transaction> findByUserIdOrReceiverId(Integer userId,Integer receiverId);
+
+    public List<Transaction> findByType(Type type);
+
 
 }

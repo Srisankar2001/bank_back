@@ -21,6 +21,8 @@ public class Transaction {
     private Integer id;
     private Integer userId;
     private Integer receiverId;
+    private String userAccountNumber;
+    private String receiverAccountNumber;
     private Type type;
     private Double amount;
     private Double total;
